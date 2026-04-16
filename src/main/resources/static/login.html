@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Personal Budget Manager</title>
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <main class="auth-page">
+        <section class="auth-card" aria-labelledby="login-title">
+            <h1 id="login-title">Login</h1>
+            <p class="auth-subtitle">Access your personal budget dashboard.</p>
+
+            <form id="loginForm" novalidate>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required>
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <p id="loginMessage" class="form-message" role="alert" aria-live="polite"></p>
+
+            <p class="auth-link-row">
+                New here? <a href="register.html">Create an account</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="js/api.js" defer></script>
+    <script src="js/user.js" defer></script>
+</body>
+</html>
