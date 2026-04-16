@@ -4,23 +4,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import com.budgetmanager.model.User;
 import com.budgetmanager.repository.UserRepository;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 class UserControllerIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext context;
 
     @Autowired
     private UserRepository userRepository;
@@ -29,7 +32,10 @@ class UserControllerIntegrationTests {
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
+        if (mockMvc == null) {
+            mockMvc = webAppContextSetup(context).build();
+        }
         userRepository.deleteAll();
     }
 
