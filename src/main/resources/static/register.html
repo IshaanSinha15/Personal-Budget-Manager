@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Personal Budget Manager</title>
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <main class="auth-page">
+        <section class="auth-card" aria-labelledby="register-title">
+            <h1 id="register-title">Register</h1>
+            <p class="auth-subtitle">Create your account to start tracking your budget.</p>
+
+            <form id="registerForm" novalidate>
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" autocomplete="name" required>
+
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required>
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="new-password" required>
+
+                <button type="submit">Register</button>
+            </form>
+
+            <p id="registerMessage" class="form-message" role="alert" aria-live="polite"></p>
+
+            <p class="auth-link-row">
+                Already have an account? <a href="login.html">Login</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="js/api.js" defer></script>
+    <script src="js/user.js" defer></script>
+</body>
+</html>
