@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Personal Budget Manager</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f6f8fc;
+            color: #1d2939;
+        }
+
+        .dashboard {
+            width: min(92vw, 900px);
+            background: #ffffff;
+            border: 1px solid #d0d5dd;
+            border-radius: 14px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(16, 24, 40, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            margin: 0 0 1.5rem;
+            color: #475467;
+            font-size: 0.95rem;
+        }
+
+        .user-info {
+            background: #fafbfc;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .user-info p {
+            margin: 0;
+            color: #475467;
+        }
+
+        .user-info strong {
+            color: #1d2939;
+        }
+
+        .modules-section {
+            margin-bottom: 2rem;
+        }
+
+        .modules-section h2 {
+            margin: 0 0 1rem;
+            font-size: 1.1rem;
+            color: #1d2939;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .module-card {
+            border: 1px solid #d0d5dd;
+            border-radius: 10px;
+            padding: 1.5rem;
+            background: #fafbfc;
+            text-align: center;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .module-card:hover {
+            background: #f0f4f8;
+            border-color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .module-card h3 {
+            margin: 0 0 0.5rem;
+            font-size: 1.1rem;
+            color: #1d2939;
+        }
+
+        .module-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #475467;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        a, button {
+            border: 1px solid #1d4ed8;
+            background: #1d4ed8;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.55rem 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        a:hover, button:hover {
+            background: #1e40af;
+        }
+
+        .secondary {
+            background: #ffffff;
+            color: #1d4ed8;
+            border: 1px solid #1d4ed8;
+        }
+
+        .secondary:hover {
+            background: #f0f4f8;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 1.5rem;
+            }
+
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="dashboard">
+        <h1>Personal Budget & Expense Manager</h1>
+        <p class="subtitle">Manage your finances efficiently</p>
+
+        <div class="user-info" id="userInfo" style="display: none;">
+            <p>Welcome, <strong id="userName">User</strong> | <strong id="userId"></strong></p>
+        </div>
+
+        <!-- Modules Section -->
+        <div class="modules-section">
+            <h2>Available Modules</h2>
+            <div class="modules-grid">
+                <!-- Transactions Module -->
+                <a href="transactions.html" class="module-card">
+                    <h3>💰 Transactions</h3>
+                    <p>Add and manage your income and expenses</p>
+                </a>
+
+                <!-- Budgets Module (Ready for future implementation) -->
+                <div class="module-card" style="opacity: 0.6; cursor: not-allowed;">
+                    <h3>📊 Budgets</h3>
+                    <p>Coming Soon - Budget planning and tracking</p>
+                </div>
+
+                <!-- Reports Module (Ready for future implementation) -->
+                <div class="module-card" style="opacity: 0.6; cursor: not-allowed;">
+                    <h3>📈 Reports</h3>
+                    <p>Coming Soon - Financial analysis and reports</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Authentication Section -->
+        <div class="modules-section">
+            <h2>Account</h2>
+            <div class="actions">
+                <a href="login.html" class="secondary" id="loginLink" style="display: none;">Go to Login</a>
+                <a href="register.html" class="secondary" id="registerLink" style="display: none;">Go to Register</a>
+                <button id="logoutBtn" type="button" style="display: none;">Logout</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        (function () {
+            var userId = localStorage.getItem("userId");
+            var userName = localStorage.getItem("userName");
+            var userInfo = document.getElementById("userInfo");
+            var userNameEl = document.getElementById("userName");
+            var userIdEl = document.getElementById("userId");
+            var logoutBtn = document.getElementById("logoutBtn");
+            var loginLink = document.getElementById("loginLink");
+            var registerLink = document.getElementById("registerLink");
+
+            // Show user info if logged in
+            if (userId) {
+                if (userInfo) userInfo.style.display = "block";
+                if (userNameEl) userNameEl.textContent = userName || "User";
+                if (userIdEl) userIdEl.textContent = "ID: " + userId;
+                if (logoutBtn) logoutBtn.style.display = "inline-block";
+            } else {
+                if (loginLink) loginLink.style.display = "inline-block";
+                if (registerLink) registerLink.style.display = "inline-block";
+            }
+
+            // Logout functionality
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function () {
+                    localStorage.removeItem("userId");
+                    localStorage.removeItem("userName");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "index.html";
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
