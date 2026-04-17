@@ -33,18 +33,42 @@
             }
         });
 
+        var data = null;
+        try {
+            data = await response.json();
+        } catch (error) {
+            data = null;
+        }
+
         if (!response.ok) {
-            var data = null;
-            try {
-                data = await response.json();
-            } catch (error) {
-                data = null;
-            }
             var message = data && data.message ? data.message : "Request failed";
             throw new Error(message);
         }
 
-        return response.json();
+        return data;
+    }
+
+    async function deleteRequest(path) {
+        var response = await fetch(API_BASE_URL + path, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        var data = null;
+        try {
+            data = await response.json();
+        } catch (error) {
+            data = null;
+        }
+
+        if (!response.ok) {
+            var message = data && data.message ? data.message : "Request failed";
+            throw new Error(message);
+        }
+
+        return data;
     }
 
     window.UserApi = {
@@ -60,6 +84,29 @@
                 email: email,
                 password: password
             });
+        }
+    };
+
+    // Transaction API - Following LSP and low coupling principles
+    // UI triggers creation via API (GRASP Creator pattern)
+    window.TransactionApi = {
+        addTransaction: function (transactionData) {
+            return postJson("/api/transactions/add", transactionData);
+        },
+        getTransactions: function (userId) {
+            return getJson("/api/transactions/" + userId);
+        },
+        getTransactionsByType: function (userId, type) {
+            return getJson("/api/transactions/" + userId + "/type/" + type);
+        },
+        getTransactionsByCategory: function (userId, category) {
+            return getJson("/api/transactions/" + userId + "/category/" + category);
+        },
+        getTransactionSummary: function (userId) {
+            return getJson("/api/transactions/" + userId + "/summary");
+        },
+        deleteTransaction: function (transactionId) {
+            return deleteRequest("/api/transactions/" + transactionId);
         }
     };
 
