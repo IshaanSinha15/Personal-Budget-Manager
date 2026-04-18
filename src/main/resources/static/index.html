@@ -4,86 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Personal Budget Manager</title>
-    <style>
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #f6f8fc;
-            color: #1d2939;
-        }
-
-        .dashboard {
-            width: min(92vw, 700px);
-            background: #ffffff;
-            border: 1px solid #d0d5dd;
-            border-radius: 14px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(16, 24, 40, 0.08);
-        }
-
-        h1 {
-            margin-top: 0;
-        }
-
-        .actions {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-        }
-
-        a, button {
-            border: 1px solid #1d4ed8;
-            background: #1d4ed8;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 0.55rem 0.9rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .secondary {
-            background: #ffffff;
-            color: #1d4ed8;
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <section class="dashboard">
-        <h1>Personal Budget and Expense Manager</h1>
-        <p id="welcomeMessage">Welcome to your dashboard.</p>
-        <p>This is your frontend root page. Future modules (budgets, transactions, reports) can be added as separate pages and JS files from here.</p>
+        <header class="page-header">
+            <div>
+                <h1>Personal Budget Dashboard</h1>
+                <p class="subtitle">See your budget at a glance and move to detailed modules when needed.</p>
+            </div>
+            <div class="header-actions">
+                <div class="user-badge" id="userInfo" style="display: none;">
+                    <span id="userName">User</span>
+                    <small id="userId"></small>
+                </div>
+                <a href="login.html" class="secondary" id="loginLink" style="display: none;">Login</a>
+                <a href="register.html" class="secondary" id="registerLink" style="display: none;">Register</a>
+                <button id="logoutBtn" type="button" style="display: none;">Logout</button>
+            </div>
+        </header>
 
-        <div class="actions">
-            <a href="login.html" class="secondary">Go to Login</a>
-            <a href="register.html" class="secondary">Go to Register</a>
-            <button id="logoutBtn" type="button">Logout</button>
-        </div>
+        <section class="modules-grid" aria-label="Modules">
+            <a href="transactions.html" class="module-card">
+                <h3>Transactions</h3>
+                <p>Add, edit, and track income and expense entries.</p>
+            </a>
+            <a href="budget.html" class="module-card">
+                <h3>Budget</h3>
+                <p>Open full monthly budget details and management.</p>
+            </a>
+            <a href="report.html" class="module-card report-module">
+                <h3>Reports</h3>
+                <p>View summary and monthly report data with a print option.</p>
+            </a>
+        </section>
+
+        <section class="dashboard-summary" aria-label="Budget Summary">
+            <article class="summary-tile total">
+                <span>Total Budget</span>
+                <strong id="totalBudgetValue">$0.00</strong>
+            </article>
+            <article class="summary-tile remaining" id="remainingBudgetCard">
+                <span>Remaining Budget</span>
+                <strong id="remainingBudgetValue">$0.00</strong>
+            </article>
+        </section>
+
+        <p id="budgetAlertText" class="budget-status">Login and set your monthly budget to view dashboard values.</p>
+        <p id="budgetMessage" class="budget-alert" role="status" aria-live="polite"></p>
     </section>
 
-    <script>
-        (function () {
-            var userId = localStorage.getItem("userId");
-            var userName = localStorage.getItem("userName");
-            var welcomeMessage = document.getElementById("welcomeMessage");
-            if (welcomeMessage && userId) {
-                welcomeMessage.textContent = userName ? ("Welcome, " + userName + " (User ID: " + userId + ")") : ("Welcome back (User ID: " + userId + ")");
-            }
-
-            var logoutBtn = document.getElementById("logoutBtn");
-            if (logoutBtn) {
-                logoutBtn.addEventListener("click", function () {
-                    localStorage.removeItem("userId");
-                    localStorage.removeItem("userName");
-                    localStorage.removeItem("userEmail");
-                    window.location.href = "login.html";
-                });
-            }
-        })();
-    </script>
+    <script src="js/api.js" defer></script>
+    <script src="js/dashboard.js" defer></script>
+    <script src="js/budget.js" defer></script>
 </body>
 </html>

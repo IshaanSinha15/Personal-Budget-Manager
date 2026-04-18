@@ -7,11 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.budgetmanager.model.User;
 import com.budgetmanager.repository.UserRepository;
@@ -19,7 +19,6 @@ import com.budgetmanager.repository.UserRepository;
 @SpringBootTest
 class UserControllerIntegrationTests {
 
-    @Autowired
     private MockMvc mockMvc;
 
     @Autowired

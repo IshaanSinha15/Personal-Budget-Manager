@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions | Personal Budget Manager</title>
+    <link rel="stylesheet" href="css/transactions.css">
+</head>
+<body>
+    <div class="transactions-page">
+        <section class="transactions-container">
+            <header class="page-header">
+                <h1>Manage Transactions</h1>
+                <nav class="breadcrumb">
+                    <a href="index.html">Dashboard</a> / <span>Transactions</span>
+                </nav>
+                <div class="display-controls" style="margin-top: 1rem;">
+                    <a href="budget.html" class="btn btn-secondary">Budget Details</a>
+                    <button id="logoutBtn" type="button" class="btn btn-primary">Logout</button>
+                </div>
+            </header>
+
+            <!-- Add Transaction Form Section -->
+            <section class="form-section">
+                <h2>Add New Transaction</h2>
+                <form id="transactionForm" class="transaction-form">
+                    <div class="form-group">
+                        <label for="type">Type <span class="required">*</span></label>
+                        <select id="type" required>
+                            <option value="">Select Type</option>
+                            <option value="INCOME">Income</option>
+                            <option value="EXPENSE">Expense</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category <span class="required">*</span></label>
+                        <select id="category" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Amount <span class="required">*</span></label>
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            placeholder="0.00" 
+                            step="0.01" 
+                            min="0" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Date <span class="required">*</span></label>
+                        <input 
+                            type="date" 
+                            id="date" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea 
+                            id="description" 
+                            placeholder="Optional: Add notes about this transaction"
+                            rows="3"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-message" id="transactionMessage"></div>
+
+                    <button type="submit" class="btn btn-primary">Add Transaction</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetTransactionForm()">Clear</button>
+                </form>
+            </section>
+
+            <!-- Transactions Display Section -->
+            <section class="display-section">
+                <div class="display-header">
+                    <h2>Your Transactions</h2>
+                    <div class="display-controls">
+                        <select id="filterType" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="INCOME">Income Only</option>
+                            <option value="EXPENSE">Expense Only</option>
+                        </select>
+                        <button class="btn btn-small" onclick="refreshTransactions()">Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="transactions-table" id="transactionsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsBody">
+                            <tr class="empty-row">
+                                <td colspan="6">Loading transactions...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="summary-section" id="summarySection" style="display: none;">
+                    <div class="summary-card">
+                        <h3>Total Income</h3>
+                        <p class="summary-value income" id="totalIncome">$0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Expenses</h3>
+                        <p class="summary-value expense" id="totalExpenses">$0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Net Balance</h3>
+                        <p class="summary-value balance" id="netBalance">$0.00</p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="page-footer">
+                <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+            </footer>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/transaction.js"></script>
+</body>
+</html>

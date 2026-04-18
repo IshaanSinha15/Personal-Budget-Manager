@@ -1,0 +1,147 @@
+.report-page {
+    width: min(94vw, 1080px);
+    margin: 1.75rem auto;
+    padding: 0 0.4rem 1rem;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.report-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.report-card {
+    background: #ffffff;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    padding: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.05);
+}
+
+.report-card span {
+    color: #475467;
+    font-size: 0.9rem;
+}
+
+.report-card strong {
+    color: #1d2939;
+    font-size: 1.35rem;
+}
+
+.report-card.income {
+    border-left: 4px solid #0f766e;
+}
+
+.report-card.expense {
+    border-left: 4px solid #b42318;
+}
+
+.report-card.balance {
+    border-left: 4px solid #1d4ed8;
+}
+
+.report-card.transactions {
+    border-left: 4px solid #7c3aed;
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.report-panel {
+    background: #ffffff;
+    border: 1px solid #d0d5dd;
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.05);
+}
+
+.report-panel h2 {
+    margin: 0 0 0.8rem;
+    font-size: 1.1rem;
+}
+
+.kv-list {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.kv-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0.7rem;
+    border-radius: 10px;
+    background: #f7faff;
+    border: 1px solid #e1e8f5;
+}
+
+.kv-item span {
+    color: #475467;
+}
+
+.kv-item strong {
+    color: #123356;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 460px;
+}
+
+.report-table th,
+.report-table td {
+    border-bottom: 1px solid #e6ebf3;
+    text-align: left;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+}
+
+.report-table th {
+    background: #f7fafe;
+    color: #334155;
+    font-weight: 600;
+}
+
+.recent-panel {
+    margin-bottom: 1rem;
+}
+
+@media print {
+    .actions,
+    #reportMessage {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff;
+    }
+
+    .report-page,
+    .report-panel,
+    .report-card {
+        box-shadow: none;
+        border-color: #c8d2e0;
+    }
+}

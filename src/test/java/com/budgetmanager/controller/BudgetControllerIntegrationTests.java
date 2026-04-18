@@ -6,13 +6,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import org.springframework.web.context.WebApplicationContext;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
+import com.budgetmanager.controller.dto.AddCategoryRequest;
+import com.budgetmanager.controller.dto.SetBudgetRequest;
+import com.budgetmanager.controller.dto.SpendingRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.budgetmanager.controller.dto.*;
 
 /**
  * BudgetController Integration Tests
@@ -20,16 +27,15 @@ import com.budgetmanager.controller.dto.*;
  * Demonstrates Strategy Pattern, Observer Pattern, and Composite Pattern
  */
 @SpringBootTest
+@Transactional
 public class BudgetControllerIntegrationTests {
 
-    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext context;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     private SetBudgetRequest setBudgetRequest;
     private SpendingRequest spendingRequest;
@@ -118,8 +124,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(get("/api/budget/" + budgetId + "/remaining"))
                 .andExpect(status().isOk())
@@ -142,8 +147,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(post("/api/budget/" + budgetId + "/category")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -171,8 +175,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(post("/api/budget/" + budgetId + "/category")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -201,8 +204,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(post("/api/budget/" + budgetId + "/category")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -235,8 +237,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(post("/api/budget/" + budgetId + "/check"))
                 .andExpect(status().isOk());
@@ -258,8 +259,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(post("/api/budget/" + budgetId + "/strategy/monthly"))
                 .andExpect(status().isOk())
@@ -282,8 +282,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(post("/api/budget/" + budgetId + "/strategy/category/Food"))
                 .andExpect(status().isOk())
@@ -306,8 +305,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         mockMvc.perform(delete("/api/budget/" + budgetId))
                 .andExpect(status().isOk());
@@ -330,8 +328,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         // Spend 250 (50% of 500)
         SpendingRequest spendRequest = new SpendingRequest(250.0, "");
@@ -359,8 +356,7 @@ public class BudgetControllerIntegrationTests {
                 .getResponse()
                 .getContentAsString();
 
-        BudgetResponse budgetResponse = objectMapper.readValue(setResponse, BudgetResponse.class);
-        Long budgetId = budgetResponse.getId();
+        Long budgetId = objectMapper.readTree(setResponse).path("id").asLong();
 
         AddCategoryRequest foodCategory = new AddCategoryRequest("Food", 300.0);
         AddCategoryRequest transportCategory = new AddCategoryRequest("Transport", 200.0);

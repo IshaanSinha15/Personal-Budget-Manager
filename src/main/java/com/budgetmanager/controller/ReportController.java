@@ -13,10 +13,10 @@ import java.util.Map;
  * Handles all HTTP requests for the Reports & Dashboard module.
  * Delegates ALL business logic to ReportService (no logic here).
  *
- * Base path: /reports
+ * Base paths: /reports and /api/reports
  */
 @RestController
-@RequestMapping("/reports")
+@RequestMapping({"/reports", "/api/reports"})
 public class ReportController {
 
     @Autowired

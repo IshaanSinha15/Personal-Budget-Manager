@@ -1,17 +1,19 @@
 package com.budgetmanager.service;
 
-import com.budgetmanager.controller.dto.TransactionResponse;
-import com.budgetmanager.factory.TransactionFactory;
-import com.budgetmanager.model.*;
-import com.budgetmanager.repository.TransactionRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.budgetmanager.factory.TransactionFactory;
+import com.budgetmanager.model.Category;
+import com.budgetmanager.model.Transaction;
+import com.budgetmanager.model.TransactionType;
+import com.budgetmanager.repository.TransactionRepository;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Service layer for transaction management
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final BudgetService budgetService;
 
     /**
      * Add a new transaction
@@ -50,7 +53,16 @@ public class TransactionService {
             type, amount, category, date, userId, description
         );
 
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        budgetService.adjustBudgetFromTransaction(
+            saved.getUserId(),
+            saved.getType(),
+            saved.getAmount().doubleValue(),
+            saved.getCategory() != null ? saved.getCategory().name() : null,
+            1
+        );
+
+        return saved;
     }
 
     /**
@@ -186,6 +198,10 @@ public class TransactionService {
                                         Category category, String description) {
         Transaction transaction = transactionRepository.findById(transactionId)
             .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
+
+        TransactionType previousType = transaction.getType();
+        BigDecimal previousAmount = transaction.getAmount();
+        Category previousCategory = transaction.getCategory();
         
         if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             transaction.setAmount(amount);
@@ -197,7 +213,25 @@ public class TransactionService {
             transaction.setDescription(description);
         }
         
-        return transactionRepository.save(transaction);
+        Transaction updated = transactionRepository.save(transaction);
+
+        // Reverse old transaction impact first, then apply the new one.
+        budgetService.adjustBudgetFromTransaction(
+            updated.getUserId(),
+            previousType,
+            previousAmount.doubleValue(),
+            previousCategory != null ? previousCategory.name() : null,
+            -1
+        );
+        budgetService.adjustBudgetFromTransaction(
+            updated.getUserId(),
+            updated.getType(),
+            updated.getAmount().doubleValue(),
+            updated.getCategory() != null ? updated.getCategory().name() : null,
+            1
+        );
+
+        return updated;
     }
 
     /**
@@ -205,9 +239,17 @@ public class TransactionService {
      * @param transactionId Transaction ID
      */
     public void deleteTransaction(Long transactionId) {
-        if (!transactionRepository.existsById(transactionId)) {
-            throw new IllegalArgumentException("Transaction not found");
-        }
+        Transaction transaction = transactionRepository.findById(transactionId)
+            .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
+
+        budgetService.adjustBudgetFromTransaction(
+            transaction.getUserId(),
+            transaction.getType(),
+            transaction.getAmount().doubleValue(),
+            transaction.getCategory() != null ? transaction.getCategory().name() : null,
+            -1
+        );
+
         transactionRepository.deleteById(transactionId);
     }
 

@@ -1,0 +1,351 @@
+:root {
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --text: #1d2939;
+    --muted: #475467;
+    --line: #d0d5dd;
+    --primary: #1d4ed8;
+    --primary-dark: #1e40af;
+    --success: #047857;
+    --danger: #b42318;
+    --income: #0f766e;
+    --expense: #b42318;
+    --shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
+    --shadow-soft: 0 4px 14px rgba(16, 24, 40, 0.06);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at top left, #e7efff 0%, #f2f6ff 36%, var(--bg) 100%);
+    color: var(--text);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.transactions-page {
+    width: min(96vw, 1160px);
+    margin: 1.5rem auto 2.2rem;
+}
+
+.transactions-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.page-header,
+.form-section,
+.display-section,
+.page-footer {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+}
+
+.page-header {
+    padding: 1.2rem 1.3rem;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: clamp(1.55rem, 2.2vw, 2rem);
+}
+
+.breadcrumb {
+    margin-top: 0.35rem;
+    color: var(--muted);
+}
+
+.breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.form-section {
+    padding: 1.1rem 1.3rem 1.2rem;
+}
+
+.form-section h2,
+.display-section h2 {
+    margin: 0 0 0.9rem;
+    font-size: 1.45rem;
+}
+
+.transaction-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.95rem;
+    align-items: end;
+}
+
+.form-group {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.93rem;
+}
+
+.required {
+    color: var(--danger);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea,
+.filter-select {
+    width: 100%;
+    padding: 0.72rem 0.78rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--text);
+    font: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.filter-select:focus {
+    outline: 2px solid #dbeafe;
+    border-color: #93c5fd;
+}
+
+.form-message {
+    grid-column: 1 / -1;
+    min-height: 1.2rem;
+    font-size: 0.92rem;
+    color: var(--muted);
+}
+
+.form-message.success {
+    color: var(--success);
+}
+
+.form-message.error {
+    color: var(--danger);
+}
+
+.btn {
+    border: 1px solid var(--primary);
+    background: linear-gradient(180deg, #2d63e6, var(--primary));
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.66rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.92rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
+    background: var(--primary-dark);
+}
+
+.btn-secondary {
+    background: #ffffff;
+    color: var(--primary);
+}
+
+.btn-small {
+    padding: 0.5rem 0.82rem;
+    font-size: 0.86rem;
+}
+
+.display-section {
+    padding: 1.1rem 1.3rem;
+}
+
+.display-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+
+.display-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.transactions-table th,
+.transactions-table td {
+    border-bottom: 1px solid #e8edf4;
+    padding: 0.64rem;
+    text-align: left;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.transactions-table th {
+    background: #f7fafe;
+    color: #344054;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.transactions-table tbody tr:nth-child(even) {
+    background: #fbfcff;
+}
+
+.transactions-table tbody tr:hover {
+    background: #f0f5ff;
+}
+
+.type-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.type-badge.income {
+    background: #ecfdf3;
+    color: var(--income);
+}
+
+.type-badge.expense {
+    background: #fef3f2;
+    color: var(--expense);
+}
+
+.amount.income {
+    color: var(--income);
+    font-weight: 700;
+}
+
+.amount.expense {
+    color: var(--expense);
+    font-weight: 700;
+}
+
+td.actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 0.34rem 0.6rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+}
+
+.action-edit {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+.action-delete {
+    background: #fef2f2;
+    color: #b42318;
+    border-color: #fecaca;
+}
+
+.empty-row td {
+    color: var(--muted);
+    text-align: center;
+    padding: 1rem;
+}
+
+.summary-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+.summary-card {
+    border: 1px solid #e4eaf4;
+    border-radius: 12px;
+    padding: 0.92rem;
+    background: linear-gradient(145deg, #f9fbff, #f4f8ff);
+    box-shadow: var(--shadow-soft);
+}
+
+.summary-card h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.summary-value {
+    margin: 0.45rem 0 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.summary-value.income {
+    color: var(--income);
+}
+
+.summary-value.expense {
+    color: var(--expense);
+}
+
+.summary-value.balance {
+    color: #1d4ed8;
+}
+
+.page-footer {
+    padding: 0.95rem 1.3rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+    .transactions-page {
+        width: min(98vw, 1160px);
+        margin-top: 1rem;
+    }
+
+    .page-header,
+    .form-section,
+    .display-section,
+    .page-footer {
+        padding: 0.85rem;
+    }
+}

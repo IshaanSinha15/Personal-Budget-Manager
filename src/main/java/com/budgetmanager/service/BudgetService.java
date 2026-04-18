@@ -1,16 +1,17 @@
 package com.budgetmanager.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.budgetmanager.model.Budget;
 import com.budgetmanager.model.BudgetCategory;
-import com.budgetmanager.repository.BudgetRepository;
+import com.budgetmanager.model.TransactionType;
 import com.budgetmanager.repository.BudgetCategoryRepository;
-
-import java.util.List;
-import java.util.Optional;
+import com.budgetmanager.repository.BudgetRepository;
 
 /**
  * BudgetService
@@ -197,5 +198,72 @@ public class BudgetService {
      */
     public void deleteBudget(Long budgetId) {
         budgetRepository.deleteById(budgetId);
+    }
+
+    /**
+     * Apply transaction impact to the active monthly budget for a user.
+     * Expense consumes budget; income restores available budget.
+     *
+     * @param userId User id
+     * @param type Transaction type
+     * @param amount Transaction amount
+     * @param categoryName Optional category name (used for expense categories)
+     * @param direction +1 to apply, -1 to reverse
+     */
+    public void adjustBudgetFromTransaction(Long userId,
+                                            TransactionType type,
+                                            Double amount,
+                                            String categoryName,
+                                            int direction) {
+        if (userId == null || type == null || amount == null || amount <= 0 || (direction != 1 && direction != -1)) {
+            return;
+        }
+
+        Optional<Budget> budgetOpt = findActiveBudgetForUser(userId);
+        if (budgetOpt.isEmpty()) {
+            return;
+        }
+
+        Budget budget = budgetOpt.get();
+
+        // Expense increases spent amount, income decreases it (restores budget).
+        double signedDelta = (type == TransactionType.EXPENSE ? amount : -amount) * direction;
+        double updatedSpent = budget.getTotalSpent() + signedDelta;
+        budget.setTotalSpent(Math.max(0.0, updatedSpent));
+
+        if (type == TransactionType.EXPENSE && categoryName != null && !categoryName.isBlank()) {
+            BudgetCategory category = budget.getCategories().stream()
+                    .filter(c -> c.getName().equalsIgnoreCase(categoryName))
+                    .findFirst()
+                    .orElse(null);
+
+            if (category != null) {
+                double updatedCategorySpent = category.getSpent() + (amount * direction);
+                category.setSpent(Math.max(0.0, updatedCategorySpent));
+                budgetCategoryRepository.save(category);
+            }
+        }
+
+        budgetRepository.save(budget);
+        checkBudget(budget.getId());
+    }
+
+    private Optional<Budget> findActiveBudgetForUser(Long userId) {
+        Optional<Budget> monthly = budgetRepository.findByUserIdAndPeriod(userId, "monthly");
+        if (monthly.isPresent()) {
+            return monthly;
+        }
+
+        Optional<Budget> monthlyUpper = budgetRepository.findByUserIdAndPeriod(userId, "MONTHLY");
+        if (monthlyUpper.isPresent()) {
+            return monthlyUpper;
+        }
+
+        List<Budget> budgets = budgetRepository.findAllByUserId(userId);
+        if (budgets.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(budgets.get(0));
     }
 }
