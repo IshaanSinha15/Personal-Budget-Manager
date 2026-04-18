@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | Personal Budget Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/report.css">
+</head>
+<body>
+    <section class="report-page">
+        <header class="report-header">
+            <div>
+                <h1>Financial Reports</h1>
+                <p class="subtitle">Review your summary, monthly numbers, and category distribution.</p>
+            </div>
+            <div class="actions">
+                <a href="index.html" class="secondary">Dashboard</a>
+                <a href="transactions.html" class="secondary">Transactions</a>
+                <button id="printReportBtn" type="button">Print Report</button>
+                <button id="logoutBtn" type="button">Logout</button>
+            </div>
+        </header>
+
+        <p id="reportMessage" class="budget-alert" role="status" aria-live="polite"></p>
+
+        <section class="report-cards" aria-label="Summary values">
+            <article class="report-card income">
+                <span>Total Income</span>
+                <strong id="totalIncomeValue">$0.00</strong>
+            </article>
+            <article class="report-card expense">
+                <span>Total Expense</span>
+                <strong id="totalExpenseValue">$0.00</strong>
+            </article>
+            <article class="report-card balance">
+                <span>Balance</span>
+                <strong id="balanceValue">$0.00</strong>
+            </article>
+            <article class="report-card transactions">
+                <span>Transactions This Month</span>
+                <strong id="transactionCountValue">0</strong>
+            </article>
+        </section>
+
+        <section class="report-grid">
+            <article class="report-panel">
+                <h2>Monthly Report</h2>
+                <div class="kv-list">
+                    <div class="kv-item"><span>Month</span><strong id="monthValue">-</strong></div>
+                    <div class="kv-item"><span>Year</span><strong id="yearValue">-</strong></div>
+                    <div class="kv-item"><span>Income</span><strong id="monthlyIncomeValue">$0.00</strong></div>
+                    <div class="kv-item"><span>Expense</span><strong id="monthlyExpenseValue">$0.00</strong></div>
+                </div>
+            </article>
+
+            <article class="report-panel">
+                <h2>Category Report</h2>
+                <div class="table-wrapper">
+                    <table class="report-table" id="categoryTable">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="2">No category data available.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
+        <section class="report-panel recent-panel">
+            <h2>Recent Transactions</h2>
+            <div class="table-wrapper">
+                <table class="report-table" id="recentTransactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5">No recent transactions found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+
+    <script src="js/api.js" defer></script>
+    <script src="js/report.js" defer></script>
+</body>
+</html>

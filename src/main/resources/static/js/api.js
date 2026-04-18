@@ -1,5 +1,7 @@
 (function () {
-    var API_BASE_URL = "http://localhost:8080";
+    var API_BASE_URL = (window.location && window.location.origin && window.location.origin !== "null")
+        ? window.location.origin
+        : "http://localhost:8080";
 
     async function postJson(path, payload) {
         var response = await fetch(API_BASE_URL + path, {
@@ -18,7 +20,7 @@
         }
 
         if (!response.ok) {
-            var message = data && data.message ? data.message : "Request failed";
+            var message = data && (data.message || data.error) ? (data.message || data.error) : "Request failed";
             throw new Error(message);
         }
 

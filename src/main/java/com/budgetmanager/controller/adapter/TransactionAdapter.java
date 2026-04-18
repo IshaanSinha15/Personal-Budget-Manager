@@ -1,11 +1,12 @@
 package com.budgetmanager.controller.adapter;
 
+import org.springframework.stereotype.Component;
+
 import com.budgetmanager.controller.dto.TransactionRequest;
 import com.budgetmanager.controller.dto.TransactionResponse;
 import com.budgetmanager.model.Category;
 import com.budgetmanager.model.Transaction;
 import com.budgetmanager.model.TransactionType;
-import org.springframework.stereotype.Component;
 
 /**
  * Adapter to convert between Transaction entities and DTOs
@@ -34,7 +35,11 @@ public class TransactionAdapter {
      */
     public Category toCategory(String categoryString) {
         try {
-            return Category.valueOf(categoryString.toUpperCase());
+            String normalized = categoryString == null ? "" : categoryString.trim()
+                .toUpperCase()
+                .replace('-', '_')
+                .replace(' ', '_');
+            return Category.valueOf(normalized);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid category: " + categoryString);
         }

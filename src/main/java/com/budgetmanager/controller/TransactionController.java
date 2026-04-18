@@ -1,5 +1,25 @@
 package com.budgetmanager.controller;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.budgetmanager.controller.adapter.TransactionAdapter;
 import com.budgetmanager.controller.dto.TransactionRequest;
 import com.budgetmanager.controller.dto.TransactionResponse;
@@ -7,17 +27,8 @@ import com.budgetmanager.model.Category;
 import com.budgetmanager.model.Transaction;
 import com.budgetmanager.model.TransactionType;
 import com.budgetmanager.service.TransactionService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 /**
  * REST Controller for Transaction Management APIs
@@ -41,10 +52,20 @@ public class TransactionController {
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addTransaction(
             @RequestBody TransactionRequest request,
-            @RequestParam Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
         
         try {
+            Long resolvedUserId = userId != null ? userId :
+                (request.getUserId() != null ? request.getUserId() : headerUserId);
+
             // Validate input
+            if (resolvedUserId == null) {
+                return ResponseEntity.badRequest().body(
+                    createErrorResponse("User ID is required. Please login again and retry.")
+                );
+            }
+
             if (request.getAmount() == null) {
                 return ResponseEntity.badRequest().body(createErrorResponse("Amount is required"));
             }
@@ -61,7 +82,7 @@ public class TransactionController {
                 type,
                 category,
                 transactionDate,
-                userId,
+                resolvedUserId,
                 request.getDescription()
             );
             
