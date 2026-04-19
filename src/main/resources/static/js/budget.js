@@ -16,9 +16,8 @@
         var remainingValue = document.getElementById("remainingBudgetValue");
         var remainingCard = document.getElementById("remainingBudgetCard");
         var alertText = document.getElementById("budgetAlertText");
-        var budgetStatus = document.getElementById("budgetStatus");
 
-        if (!budget || !totalValue || !remainingValue || !remainingCard || !alertText || !budgetStatus) {
+        if (!budget || !totalValue || !remainingValue || !remainingCard || !alertText) {
             return;
         }
 

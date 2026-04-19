@@ -1,151 +1,183 @@
-/**
- * report.js  –  Reports & Dashboard module (Tahir)
- *
- * Responsibilities (SRP):
- *   - Fetch dashboard data from /reports/dashboard/{userId}
- *   - Render summary cards: income, expense, balance
- *   - Render recent-transactions table
- *
- * Design patterns:
- *   - Facade  : single loadDashboard() call hides all fetch/render steps
- *   - Template Method : fetchData → processData → renderUI
- *
- * Does NOT touch budget logic – that lives in budget.js (Low Coupling).
- */
-
 (function () {
-
-    // ── Helpers ────────────────────────────────────────────────────────────
-
-    function formatMoney(value) {
-        var num = parseFloat(value);
-        if (isNaN(num)) { return "$0.00"; }
-        return "$" + num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    function formatDate(dateStr) {
-        if (!dateStr) { return "—"; }
-        var d = new Date(dateStr);
-        if (isNaN(d.getTime())) { return dateStr; }
-        return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-    }
-
-    // ── Step 1 : fetch ─────────────────────────────────────────────────────
-
-    async function fetchDashboard(userId) {
-        var response = await fetch("http://localhost:8080/reports/dashboard/" + encodeURIComponent(userId));
-        if (!response.ok) {
-            throw new Error("Dashboard API returned " + response.status);
+    function formatCurrency(value) {
+        var number = Number(value || 0);
+        if (!Number.isFinite(number)) {
+            number = 0;
         }
-        return response.json();
+
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 2
+        }).format(number);
     }
 
-    // ── Step 2 : process (validate / normalise) ────────────────────────────
-
-    function processDashboard(data) {
-        return {
-            totalIncome:          parseFloat(data.totalIncome)  || 0,
-            totalExpense:         parseFloat(data.totalExpense) || 0,
-            balance:              parseFloat(data.balance)      || 0,
-            recentTransactions:   Array.isArray(data.recentTransactions) ? data.recentTransactions : []
-        };
+    function escapeHtml(text) {
+        if (text == null) {
+            return "";
+        }
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
 
-    // ── Step 3 : render ────────────────────────────────────────────────────
-
-    function renderSummaryCards(data) {
-        var incomeEl  = document.getElementById("dashIncome");
-        var expenseEl = document.getElementById("dashExpense");
-        var balanceEl = document.getElementById("dashBalance");
-
-        if (incomeEl)  { incomeEl.textContent  = formatMoney(data.totalIncome);  }
-        if (expenseEl) { expenseEl.textContent = formatMoney(data.totalExpense); }
-        if (balanceEl) { balanceEl.textContent = formatMoney(data.balance);      }
+    function setMessage(text, isError) {
+        var messageEl = document.getElementById("reportMessage");
+        if (!messageEl) {
+            return;
+        }
+        messageEl.textContent = text || "";
+        messageEl.style.color = isError ? "#b42318" : "#065f46";
     }
 
-    function renderTransactionsTable(transactions) {
-        var container = document.getElementById("recentTransactionsContainer");
-        if (!container) { return; }
+    function setText(id, value) {
+        var element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    }
 
-        if (transactions.length === 0) {
-            container.innerHTML = "<p class=\"no-data\">No transactions found. Add your first transaction to see it here.</p>";
+    function renderCategoryTable(categoryData) {
+        var table = document.getElementById("categoryTable");
+        if (!table || !table.tBodies || !table.tBodies[0]) {
             return;
         }
 
-        var rows = transactions.map(function (t) {
-            var type    = (t.type || "").toUpperCase();
-            var cat     = t.category || "—";
-            var desc    = t.description || "—";
-            var sign    = type === "INCOME" ? "+" : "-";
-            var amount  = formatMoney(t.amount);
-            var dateStr = formatDate(t.date || t.createdAt);
+        var tbody = table.tBodies[0];
+        var keys = Object.keys(categoryData || {}).filter(function (key) {
+            return key !== "message";
+        });
 
-            return "<tr>" +
-                "<td>" + dateStr + "</td>" +
-                "<td><span class=\"badge " + type + "\">" + type + "</span></td>" +
-                "<td>" + cat + "</td>" +
-                "<td>" + desc + "</td>" +
-                "<td class=\"txn-amount " + type + "\">" + sign + amount + "</td>" +
-            "</tr>";
-        }).join("");
+        if (keys.length === 0) {
+            tbody.innerHTML = "<tr><td colspan=\"2\">No category data available.</td></tr>";
+            return;
+        }
 
-        container.innerHTML =
-            "<table class=\"txn-table\">" +
-                "<thead><tr>" +
-                    "<th>Date</th>" +
-                    "<th>Type</th>" +
-                    "<th>Category</th>" +
-                    "<th>Description</th>" +
-                    "<th>Amount</th>" +
-                "</tr></thead>" +
-                "<tbody>" + rows + "</tbody>" +
-            "</table>";
+        tbody.innerHTML = keys
+            .map(function (key) {
+                return "<tr><td>" + escapeHtml(key) + "</td><td>" + escapeHtml(formatCurrency(categoryData[key])) + "</td></tr>";
+            })
+            .join("");
     }
 
-    // ── Main entry point ───────────────────────────────────────────────────
+    function normalizeDate(dateValue) {
+        if (!dateValue) {
+            return "-";
+        }
 
-    async function loadDashboard(userId) {
+        var normalized = new Date(dateValue);
+        if (Number.isNaN(normalized.getTime())) {
+            return String(dateValue);
+        }
+
+        return normalized.toLocaleDateString();
+    }
+
+    function renderRecentTransactions(items) {
+        var table = document.getElementById("recentTransactionsTable");
+        if (!table || !table.tBodies || !table.tBodies[0]) {
+            return;
+        }
+
+        var tbody = table.tBodies[0];
+        var rows = Array.isArray(items) ? items : [];
+
+        if (rows.length === 0) {
+            tbody.innerHTML = "<tr><td colspan=\"5\">No recent transactions found.</td></tr>";
+            return;
+        }
+
+        tbody.innerHTML = rows
+            .map(function (item) {
+                return "<tr>"
+                    + "<td>" + escapeHtml(normalizeDate(item.date)) + "</td>"
+                    + "<td>" + escapeHtml(item.type || "-") + "</td>"
+                    + "<td>" + escapeHtml(item.category || "-") + "</td>"
+                    + "<td>" + escapeHtml(formatCurrency(item.amount)) + "</td>"
+                    + "<td>" + escapeHtml(item.description || "-") + "</td>"
+                    + "</tr>";
+            })
+            .join("");
+    }
+
+    function clearSession() {
+        localStorage.removeItem("userId");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userEmail");
+    }
+
+    function initializeHeaderActions() {
+        var logoutBtn = document.getElementById("logoutBtn");
+        var printBtn = document.getElementById("printReportBtn");
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", function () {
+                clearSession();
+                window.location.href = "login.html";
+            });
+        }
+
+        if (printBtn) {
+            printBtn.addEventListener("click", function () {
+                window.print();
+            });
+        }
+    }
+
+    async function loadReportData() {
+        if (!window.ReportApi) {
+            setMessage("Report API is not available.", true);
+            return;
+        }
+
+        var userId = localStorage.getItem("userId");
         if (!userId) {
-            // Not logged in — show placeholder text, budget.js handles its own message
-            var container = document.getElementById("recentTransactionsContainer");
-            if (container) {
-                container.innerHTML = "<p class=\"no-data\">Login first to see your dashboard data.</p>";
-            }
+            setMessage("Please login to view reports.", true);
+            setTimeout(function () {
+                window.location.href = "login.html";
+            }, 900);
             return;
         }
 
         try {
-            // Template Method: fetch → process → render
-            var raw       = await fetchDashboard(userId);
-            var data      = processDashboard(raw);
-            renderSummaryCards(data);
-            renderTransactionsTable(data.recentTransactions);
+            setMessage("Loading report data...", false);
+
+            var responses = await Promise.all([
+                window.ReportApi.getSummary(userId),
+                window.ReportApi.getMonthlyReport(userId),
+                window.ReportApi.getCategoryReport(userId),
+                window.ReportApi.getDashboardReport(userId)
+            ]);
+
+            var summary = responses[0] || {};
+            var monthly = responses[1] || {};
+            var category = responses[2] || {};
+            var dashboard = responses[3] || {};
+
+            setText("totalIncomeValue", formatCurrency(summary.totalIncome));
+            setText("totalExpenseValue", formatCurrency(summary.totalExpense));
+            setText("balanceValue", formatCurrency(summary.balance));
+            setText("transactionCountValue", String(monthly.transactionCount || 0));
+
+            setText("monthValue", monthly.month || "-");
+            setText("yearValue", monthly.year || "-");
+            setText("monthlyIncomeValue", formatCurrency(monthly.totalIncome));
+            setText("monthlyExpenseValue", formatCurrency(monthly.totalExpense));
+
+            renderCategoryTable(category);
+            renderRecentTransactions(dashboard.recentTransactions);
+
+            setMessage("Report updated.", false);
         } catch (error) {
-            console.error("Dashboard load error:", error);
-
-            // Show graceful fallback — don't crash the whole page
-            var incomeEl  = document.getElementById("dashIncome");
-            var expenseEl = document.getElementById("dashExpense");
-            var balanceEl = document.getElementById("dashBalance");
-            if (incomeEl)  { incomeEl.textContent  = "$0.00"; }
-            if (expenseEl) { expenseEl.textContent = "$0.00"; }
-            if (balanceEl) { balanceEl.textContent = "$0.00"; }
-
-            var container = document.getElementById("recentTransactionsContainer");
-            if (container) {
-                container.innerHTML = "<p class=\"no-data\">Could not load transactions. Make sure the server is running.</p>";
-            }
+            setMessage(error && error.message ? error.message : "Could not load report data.", true);
         }
     }
 
-    // ── Auto-run on DOMContentLoaded ───────────────────────────────────────
-
     document.addEventListener("DOMContentLoaded", function () {
-        var userId = localStorage.getItem("userId");
-        loadDashboard(userId);
+        initializeHeaderActions();
+        loadReportData();
     });
-
-    // Expose globally so other scripts can call it if needed
-    window.loadDashboard = loadDashboard;
-
 })();
