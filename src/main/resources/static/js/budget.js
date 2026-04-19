@@ -1,4 +1,40 @@
 (function () {
+    function toCurrency(value) {
+        var numeric = Number(value);
+        if (Number.isNaN(numeric)) {
+            numeric = 0;
+        }
+        return "$" + numeric.toFixed(2);
+    }
+
+    function toPercent(value) {
+        var numeric = Number(value);
+        if (Number.isNaN(numeric)) {
+            numeric = 0;
+        }
+        return numeric.toFixed(1) + "%";
+    }
+
+    function formatDateTime(value) {
+        if (!value) {
+            return "-";
+        }
+
+        var date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return "-";
+        }
+
+        return date.toLocaleString();
+    }
+
+    function setText(id, value) {
+        var element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
     function setMessage(text, type) {
         var messageElement = document.getElementById("budgetMessage");
         if (!messageElement) {
@@ -12,29 +48,47 @@
     }
 
     function renderBudget(budget) {
+        if (!budget) {
+            return;
+        }
+
         var totalValue = document.getElementById("totalBudgetValue");
         var remainingValue = document.getElementById("remainingBudgetValue");
         var remainingCard = document.getElementById("remainingBudgetCard");
         var alertText = document.getElementById("budgetAlertText");
+        var isExceeded = Boolean(budget.isExceeded);
+        var period = budget.period || "monthly";
 
-        if (!budget || !totalValue || !remainingValue || !remainingCard || !alertText) {
-            return;
+        // Dashboard cards (index.html)
+        if (totalValue && remainingValue) {
+            totalValue.textContent = toCurrency(budget.totalBudget);
+            remainingValue.textContent = toCurrency(budget.remainingBudget);
         }
 
-        totalValue.textContent = "$" + Number(budget.totalBudget).toFixed(2);
-        remainingValue.textContent = "$" + Number(budget.remainingBudget).toFixed(2);
-
-        if (Number(budget.remainingBudget) < 0) {
-            remainingCard.classList.add("exceeded");
-            alertText.textContent = "Budget exceeded — adjust your spending or increase your monthly budget.";
-            remainingCard.classList.add("remaining");
-        } else {
-            remainingCard.classList.remove("exceeded");
-            alertText.textContent = "You are tracking your monthly spending against the budget.";
-            remainingCard.classList.add("remaining");
+        if (remainingCard && alertText) {
+            if (Number(budget.remainingBudget) < 0) {
+                remainingCard.classList.add("exceeded");
+                alertText.textContent = "Budget exceeded — adjust your spending or increase your monthly budget.";
+                remainingCard.classList.add("remaining");
+            } else {
+                remainingCard.classList.remove("exceeded");
+                alertText.textContent = "You are tracking your monthly spending against the budget.";
+                remainingCard.classList.add("remaining");
+            }
         }
 
-        if (budget.isExceeded) {
+        // Budget details page (budget.html)
+        setText("totalBudgetDetail", toCurrency(budget.totalBudget));
+        setText("totalSpentDetail", toCurrency(budget.totalSpent));
+        setText("remainingBudgetDetail", toCurrency(budget.remainingBudget));
+        setText("percentageUsedDetail", toPercent(budget.percentageUsed));
+        setText("budgetStatusDetail", isExceeded ? "Exceeded" : "Within Budget");
+        setText("budgetPeriod", period);
+        setText("budgetId", budget.id != null ? String(budget.id) : "-");
+        setText("budgetCreatedDetail", formatDateTime(budget.createdAt));
+        setText("budgetUpdatedDetail", formatDateTime(budget.updatedAt));
+
+        if (isExceeded) {
             setMessage("Warning: your budget has been exceeded.", "error");
         } else {
             setMessage("Budget loaded successfully.", "success");
@@ -80,6 +134,12 @@
 
     async function loadBudget() {
         var userId = localStorage.getItem("userId");
+        var userName = localStorage.getItem("userName");
+        var userNameElement = document.getElementById("budgetUserName");
+        if (userNameElement) {
+            userNameElement.textContent = userName || "User";
+        }
+
         if (!userId) {
             setMessage("Login first to manage your budget.", "error");
             return;
@@ -94,6 +154,16 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        var logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", function () {
+                localStorage.removeItem("userId");
+                localStorage.removeItem("userName");
+                localStorage.removeItem("userEmail");
+                window.location.href = "login.html";
+            });
+        }
+
         var budgetForm = document.getElementById("budgetForm");
         if (budgetForm) {
             budgetForm.addEventListener("submit", setBudget);
